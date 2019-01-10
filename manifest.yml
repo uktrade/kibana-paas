@@ -1,0 +1,4 @@
+---
+applications:
+- docker:
+    image: quay.io/uktrade/kibana-paas:latest
