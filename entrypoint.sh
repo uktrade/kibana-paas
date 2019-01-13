@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 set -eo pipefail
 
@@ -27,10 +27,11 @@ if ! echo ${VCAP_SERVICES} | jq ".elasticsearch[0] != null" -e; then
   exit 1
 fi
 
-export SERVER_PORT="${PORT}"
-export SERVER_NAME=$(echo ${VCAP_APPLICATION} | jq ".application_uris[0]" -r)
-export ELASTICSEARCH_URL=https://$(echo ${VCAP_SERVICES} | jq ".elasticsearch[0].credentials.hostname" -r):$(echo ${VCAP_SERVICES} | jq ".elasticsearch[0].credentials.port" -r)
-export ELASTICSEARCH_USERNAME=$(echo ${VCAP_SERVICES} | jq ".elasticsearch[0].credentials.username" -r)
-export ELASTICSEARCH_PASSWORD=$(echo ${VCAP_SERVICES} | jq ".elasticsearch[0].credentials.password" -r)
-
-exec "$@"
+exec \
+  /usr/share/kibana/bin/kibana --cpu.cgroup.path.override=/ --cpuacct.cgroup.path.override=/ \
+  --server.host=0.0.0.0 \
+  --server.port=${PORT} \
+  --server.name=$(echo ${VCAP_APPLICATION} | jq ".application_uris[0]" -r) \
+  --elasticsearch.url=https://$(echo ${VCAP_SERVICES} | jq ".elasticsearch[0].credentials.hostname" -r):$(echo ${VCAP_SERVICES} | jq ".elasticsearch[0].credentials.port" -r) \
+  --elasticsearch.username=$(echo ${VCAP_SERVICES} | jq ".elasticsearch[0].credentials.username" -r) \
+  --elasticsearch.password=$(echo ${VCAP_SERVICES} | jq ".elasticsearch[0].credentials.password" -r)
