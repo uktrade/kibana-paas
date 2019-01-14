@@ -2,11 +2,6 @@
 
 set -eo pipefail
 
-if [ -z "${PORT}" ]; then
-  echo '$PORT must be set'
-  exit 1
-fi
-
 if [ -z "${VCAP_APPLICATION}" ]; then
   echo '$VCAP_APPLICATION must be set'
   exit 1
@@ -27,11 +22,27 @@ if ! echo ${VCAP_SERVICES} | jq ".elasticsearch[0] != null" -e; then
   exit 1
 fi
 
-exec \
-  /usr/share/kibana/bin/kibana --cpu.cgroup.path.override=/ --cpuacct.cgroup.path.override=/ \
-  --server.host=0.0.0.0 \
-  --server.port=${PORT} \
+python3 -m sso-proxy &
+
+/usr/share/kibana/bin/kibana --cpu.cgroup.path.override=/ --cpuacct.cgroup.path.override=/ \
+  --server.host=127.0.0.1 \
+  --server.port=5601 \
   --server.name=$(echo ${VCAP_APPLICATION} | jq ".application_uris[0]" -r) \
   --elasticsearch.url=https://$(echo ${VCAP_SERVICES} | jq ".elasticsearch[0].credentials.hostname" -r):$(echo ${VCAP_SERVICES} | jq ".elasticsearch[0].credentials.port" -r) \
   --elasticsearch.username=$(echo ${VCAP_SERVICES} | jq ".elasticsearch[0].credentials.username" -r) \
-  --elasticsearch.password=$(echo ${VCAP_SERVICES} | jq ".elasticsearch[0].credentials.password" -r)
+  --elasticsearch.password=$(echo ${VCAP_SERVICES} | jq ".elasticsearch[0].credentials.password" -r) &
+
+while sleep 10; do
+  ps aux |grep python3 |grep -q -v grep
+  PYTHON_STATUS=$?
+  ps aux |grep kibana |grep -q -v grep
+  KIBANA_STATUS=$?
+  if [ $PYTHON_STATUS -ne 0 ]; then
+    echo "Python exited"
+    exit 1
+  fi
+  if [ $KIBANA_STATUS -ne 0 ]; then
+    echo "Kibana exited"
+    exit 1
+  fi
+done
