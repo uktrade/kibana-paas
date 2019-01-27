@@ -58,13 +58,13 @@ async def run_application():
         }
 
         with logged(
-            request['logger'], 'Elasticsearch request by (%s) to (%s) (%s) (%s)', [
+            request['logger'], 'Elasticsearch request by (%s) to (%s) (%s) (%s) (%s)', [
                 request['me_profile']['email'],
-                request.method, str(url), request_body,
+                request.method, str(url), request.url.query, request_body,
             ],
         ):
             async with client_session.request(
-                request.method, str(url), data=request_body,
+                request.method, str(url), params=request.url.query, data=request_body,
                 headers=headers,
             ) as response:
                 response_body = await response.read()
