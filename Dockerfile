@@ -15,7 +15,7 @@ RUN \
 		linux-headers=4.4.6-r2 \
 		python2=2.7.15-r3 \
 		wget=1.20.3-r0 && \
-	NODE_VERSION=v8.11.4 && \
+	NODE_VERSION=v10.21.0 && \
 	NODE_BASE_URL=https://nodejs.org/dist/${NODE_VERSION}/ && \
 	for server in ipv4.pool.sks-keyservers.net keyserver.pgp.com ha.pool.sks-keyservers.net; do \
 		# List of keys from https://github.com/nwjs/node
@@ -55,7 +55,7 @@ RUN \
 	apk add --no-cache --virtual .kibana-build-deps \
 		gnupg=2.2.19-r0 \
 		wget=1.20.3-r0 && \
-	KIBANA_VERSION=6.4.3-linux-x86_64 && \
+	KIBANA_VERSION=7.9.0-linux-x86_64 && \
 	KIBANA_BASE_URL=https://artifacts.elastic.co && \
 	KIBANA_TARBALL=kibana-oss-${KIBANA_VERSION}.tar.gz && \
 	KIBANA_TARBALL_ASC=kibana-oss-${KIBANA_VERSION}.tar.gz.asc && \
@@ -75,7 +75,14 @@ RUN \
 	apk add --no-cache \
 		jq=1.6_rc1-r1 && \
 	apk del --purge \
-		.kibana-build-deps
+		.kibana-build-deps && \
+	adduser -D kibana && \
+	chown -R kibana:kibana /usr/share/kibana/
+
+RUN \
+	# Allow Kibana to find node
+	mkdir -p /usr/share/kibana/node/bin && \
+	ln -s /usr/bin/node /usr/share/kibana/node/bin/node
 
 COPY requirements.txt /
 
@@ -98,8 +105,5 @@ EXPOSE 8080
 # PaaS appears to require this entrypoint
 COPY entrypoint.sh /usr/local/bin/docker_entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/docker_entrypoint.sh"]
-
-RUN \
-	adduser -D kibana
 
 USER kibana
