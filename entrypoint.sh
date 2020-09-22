@@ -22,7 +22,7 @@ python3 -m sso-proxy &
 /usr/share/kibana/bin/kibana --cpu.cgroup.path.override=/ --cpuacct.cgroup.path.override=/ \
   --server.host=127.0.0.1 \
   --server.port=5601 \
-  --elasticsearch.url=https://$(echo ${VCAP_SERVICES} | jq ".elasticsearch[0].credentials.hostname" -r):$(echo ${VCAP_SERVICES} | jq ".elasticsearch[0].credentials.port" -r) \
+  --elasticsearch.hosts.0=https://$(echo ${VCAP_SERVICES} | jq ".elasticsearch[0].credentials.hostname" -r):$(echo ${VCAP_SERVICES} | jq ".elasticsearch[0].credentials.port" -r) \
   --elasticsearch.username=$(echo ${VCAP_SERVICES} | jq ".elasticsearch[0].credentials.username" -r) \
   --elasticsearch.password=$(echo ${VCAP_SERVICES} | jq ".elasticsearch[0].credentials.password" -r) &
 

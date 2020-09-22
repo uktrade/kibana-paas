@@ -53,7 +53,7 @@ async def run_application():
         request_body = await request.read()
         headers = {
             header: request.headers[header]
-            for header in ['Kbn-Version', 'Content-Type']
+            for header in ['Kbn-Xsrf', 'Kbn-Version', 'Content-Type']
             if header in request.headers
         }
 
@@ -143,6 +143,12 @@ def authenticate_by_staff_sso(client_session, base, client_id, client_secret):
 
     @web.middleware
     async def _authenticate_by_sso(request, handler):
+        # Workaround https://web.dev/add-manifest/#link-manifest where cookies are not sent by
+        # default for manifests
+        if request.path == '/ui/favicons/manifest.json':
+            request['me_profile'] = {'email': '---cookies-not-sent-for-manifest---'}
+            return await handler(request)
+
         session = await get_session(request)
 
         if request.path != redirect_from_sso_path and session_token_key not in session:
