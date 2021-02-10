@@ -1,0 +1,9 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/sre-docker-registry/kibana-paas:${BRANCH_NAME}', '.']
+  timeout: 7200s
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/sre-docker-registry/kibana-paas:${BRANCH_NAME}']
+timeout: 7200s
+
+
