@@ -1,4 +1,5 @@
 ---
 applications:
 - docker:
-    image: quay.io/uktrade/kibana-paas:latest
+    image: gcr.io/sre-docker-registry/kibana-paas@sha256:5146ca847d1420437f9544f09fc03bbf190d22c0ff0f8a74a6182b268f4a7e36
+
