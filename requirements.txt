@@ -4,12 +4,14 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-aiohttp==3.8.5
+aiohttp==3.8.6
     # via
     #   -r requirements.in
     #   aiohttp-session
 aiohttp-session[aioredis]==2.7.0
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   aiohttp-session
 aioredis==1.2.0
     # via aiohttp-session
 aiosignal==1.3.1
